@@ -8,7 +8,7 @@ elements = load("elements.dat");
 elements = elements(:,6:8);
 
 E = 10^11;
-nu = 0.0;
+nu = .1;
 h = 0.1;
 
 % Constitutive matrix
@@ -56,7 +56,7 @@ end
 % Assemble F_ext and enforce boundary conditions
 F_ext = zeros(2*length(nodes),1);
 
-F = .1;
+F = 0.5;
 K_global_enforced = K_global;
 
 for i = 1:length(nodes)
@@ -80,11 +80,30 @@ end
 % Find displacement
 d = inv(K_global_enforced)*F_ext;
 
+% Find stresses
+sigma_vm = zeros(length(elements),1);
+for i = 1:length(elements)
+    node1 = elements(i,1);
+    node2 = elements(i,2);
+    node3 = elements(i,3);
+    d_i = [nodes(node1, 1) nodes(node1, 2) nodes(node2, 1) nodes(node2, 2) nodes(node3, 1) nodes(node3, 2)]';
+    
+    sigma = C*B_{i}*d_i;
+
+    sigma_vm(i) = sqrt(sigma(1)^2 - sigma(1)*sigma(2) + sigma(2)^2 + 3*sigma(3)^2);
+end
+
 % Displaced nodes
 nodes_displaced = nodes + reshape(d, 2, [])';
 
 % Plot triangles
-patch('Faces',elements,'Vertices',nodes_displaced,'FaceColor','cyan','EdgeColor','black');
+
+% Apply scaling to von Mises stresses so coloration is more apparent
+sigma_vm_sq = sigma_vm.^25;
+
+patch('Faces',elements,'Vertices',nodes_displaced,'FaceVertexCData', sigma_vm_sq,'FaceColor','flat','EdgeColor','none');
+colormap('hot');
+colorbar;
 
 % plot(nodes(:,1),nodes(:,2),'.');
 % max(d)
