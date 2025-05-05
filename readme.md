@@ -1,0 +1,2 @@
+# CEE361 Final Project, Linear elastic fracture mechanics with FEM
+Basic implementation of linear elastic fracture mechanics for three separate crack scenarios (point crack, circular crack, semicircular crack) in Matlab with various meshing schemes.
