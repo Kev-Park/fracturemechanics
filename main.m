@@ -197,11 +197,35 @@ nodes_displaced = nodes + reshape(d, 2, [])';
 % Plot triangles
 
 % Apply scaling to von Mises stresses so coloration is more apparent
-sigma_vm_sq = sigma_vm.^1;
+sigma_vm_log = log10(sigma_vm);
 
-patch('Faces',elements,'Vertices',nodes_displaced,'FaceVertexCData', sigma_vm_sq,'FaceColor','flat','EdgeColor','none');
-colormap('hot');
-colorbar;
+patch('Faces',elements,'Vertices',nodes_displaced,'FaceVertexCData', sigma_vm_log,'FaceColor','flat','EdgeColor','none', 'ButtonDownFcn', @(src, event) showStress(src, event, sigma_vm));
+colormap('jet');
+
+% Find tick marks
+ticks_real = logspace(log10(min(sigma_vm)), log10(max(sigma_vm)), 10);
+ticks_log = log10(ticks_real);
+
+colorbar('Ticks', ticks_log, 'TickLabels', ticks_real);
+
+% Display stress on hover
+function showStress(src, event, sigma_vm)
+
+    pt = event.IntersectionPoint(1:2);
+    faces = src.Faces;
+    verts = src.Vertices;
+
+    for i = 1:size(faces,1)
+        tri_idx = faces(i,:);
+        tri = verts(tri_idx, 1:2);  % 2D vertices
+
+        if inpolygon(pt(1), pt(2), tri(:,1), tri(:,2))
+            sigma_vm(i)
+            return;
+        end
+    end
+end
+
 
 % plot(nodes(:,1),nodes(:,2),'.');
 % max(d)
