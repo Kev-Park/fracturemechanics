@@ -1,10 +1,10 @@
 %% Using n-CST mesh
 clear;
 
-nodes = load("side_circle_nodes.dat");
+nodes = load("side_circle_nodes_high.dat");
 nodes = nodes(:,2:3);
 
-elements = load("side_circle_elements.dat");
+elements = load("side_circle_elements_high.dat");
 elements = elements(:,6:8);
 
 E = 10^11;
