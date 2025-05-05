@@ -11,8 +11,14 @@ E = 10^11;
 nu = .1;
 h = 0.1;
 
+% Composite parameters
+E_c = 10^11;
+nu_c = -0.99;
+bhl = 1; % bounding box half length around crack tip for composite material application
+
 % Constitutive matrix
 C = (E/(1-nu^2)) * [1 nu 0; nu 1 0; 0 0 (1-nu)/2];
+C_comp = (E_c/(1-nu_c^2)) * [1 nu_c 0; nu_c 1 0; 0 0 (1-nu_c)/2];
 
 % Calculate area, B-matrix, K-matrix (element-wise)
 for i = 1:length(elements)
@@ -27,7 +33,11 @@ for i = 1:length(elements)
 
     B_{i} = (1/(2*A_{i})) * [y2-y3 0 y3-y1 0 y1-y2 0; 0 x3-x2 0 x1-x3 0 x2-x1; x3-x2 y2-y3 x1-x3 y3-y1 x2-x1 y1-y2];
 
-    Ke_{i} = h*A_{i}*B_{i}.'*C*B_{i}; 
+    if all([x1,x2,x3] <= 3+bhl) && all([x1,x2,x3] >= 3-bhl) && all([y1,y2,y3] <= 5+bhl) && all([y1,y2,y3] >= 5-bhl) % If within composite "box" around crack tip
+        Ke_{i} = h*A_{i}*B_{i}.'*C_comp*B_{i}; 
+    else
+        Ke_{i} = h*A_{i}*B_{i}.'*C*B_{i};
+    end
 end
 
 K_global = zeros(2*length(nodes),2*length(nodes));
@@ -186,8 +196,14 @@ for i = 1:nelements
     d3 = [d(node3*2-1), d(node3*2)];
     d_i = cat(2, d1, d2, d3);
     d_i = reshape(d_i, [6, 1]);
+    
+    if all([node1(1),node2(1),node3(1)] <= 3+bhl) && all([node1(1),node2(1),node3(1)] >= 3-bhl) && all([node1(2),node2(2),node3(2)] <= 5+bhl) && all([node1(2),node2(2),node3(2)] >= 5-bhl) % If within composite "box" around crack tip
+        sigma = C_comp*B_{i}*d_i;
+    else
+        sigma = C*B_{i}*d_i;
+    end
 
-    sigma = C*B_{i}*d_i;
+    
 
     sigmas(i,:) = sigma;
     sigma_vm(i) = sqrt(sigma(1)^2 - sigma(1)*sigma(2) + sigma(2)^2 + (3/4)*sigma(3)^2);
