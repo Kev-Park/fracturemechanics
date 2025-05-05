@@ -1,10 +1,10 @@
 %% Using n-CST mesh
 clear;
 
-nodes = load("nodes.dat");
+nodes = load("circle_nodes_high.dat");
 nodes = nodes(:,2:3);
 
-elements = load("elements.dat");
+elements = load("circle_elements_high.dat");
 elements = elements(:,6:8);
 
 E = 10^11;
@@ -190,7 +190,7 @@ for i = 1:nelements
     sigma = C*B_{i}*d_i;
 
     sigmas(i,:) = sigma;
-    sigma_vm(i) = sqrt(sigma(1)^2 - sigma(1)*sigma(2) + sigma(2)^2 + 3*sigma(3)^2);
+    sigma_vm(i) = sqrt(sigma(1)^2 - sigma(1)*sigma(2) + sigma(2)^2 + (3/4)*sigma(3)^2);
 end
 
 % Displaced nodes
@@ -222,7 +222,22 @@ function showStress(src, event, sigmas)
         tri = verts(tri_idx, 1:2);  % 2D vertices
 
         if inpolygon(pt(1), pt(2), tri(:,1), tri(:,2))
+            % fea
             sigmas(i,:)
+
+            % analytical - hard coded values for formula (!)
+            K = 15000 * sqrt(pi * 3) * (1.122 - 0.231 * (3/10) + 10.55 * (3/10)^2 - 21.71 * (3/10)^3 + 30.382 * (3/10)^4);
+            r = sqrt((pt(1)-3)^2 + (pt(2)-5)^2);
+            theta = atan((pt(2)-5)/(pt(1)-3));
+            xx = (K/sqrt(2*pi*r)) * cos(theta/2) * (1 - sin(theta/2) * sin(3*theta/2));
+            yy = (K/sqrt(2*pi*r)) * cos(theta/2) * (1 + sin(theta/2) * sin(3*theta/2));
+            xy = (K/sqrt(2*pi*r)) * cos(theta/2) * sin(theta/2) * cos(3*theta/2);
+
+            % uncomment out as desired
+            % [xx, yy, 2*xy]
+            % r
+            % theta
+
             return;
         end
     end
