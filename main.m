@@ -174,6 +174,7 @@ d = K_global_enforced\F_ext;
 % end
 
 sigma_vm = zeros(nelements ,1);
+sigmas = zeros(nelements,3);
 for i = 1:nelements
     node1 = elements(i,1);
     node2 = elements(i,2);
@@ -188,6 +189,7 @@ for i = 1:nelements
 
     sigma = C*B_{i}*d_i;
 
+    sigmas(i,:) = sigma;
     sigma_vm(i) = sqrt(sigma(1)^2 - sigma(1)*sigma(2) + sigma(2)^2 + 3*sigma(3)^2);
 end
 
@@ -199,7 +201,7 @@ nodes_displaced = nodes + reshape(d, 2, [])';
 % Apply scaling to von Mises stresses so coloration is more apparent
 sigma_vm_log = log10(sigma_vm);
 
-patch('Faces',elements,'Vertices',nodes_displaced,'FaceVertexCData', sigma_vm_log,'FaceColor','flat','EdgeColor','none', 'ButtonDownFcn', @(src, event) showStress(src, event, sigma_vm));
+patch('Faces',elements,'Vertices',nodes_displaced,'FaceVertexCData', sigma_vm_log,'FaceColor','flat','EdgeColor','none', 'ButtonDownFcn', @(src, event) showStress(src, event, sigmas));
 colormap('jet');
 
 % Find tick marks
@@ -209,7 +211,7 @@ ticks_log = log10(ticks_real);
 colorbar('Ticks', ticks_log, 'TickLabels', ticks_real);
 
 % Display stress on hover
-function showStress(src, event, sigma_vm)
+function showStress(src, event, sigmas)
 
     pt = event.IntersectionPoint(1:2);
     faces = src.Faces;
@@ -220,7 +222,7 @@ function showStress(src, event, sigma_vm)
         tri = verts(tri_idx, 1:2);  % 2D vertices
 
         if inpolygon(pt(1), pt(2), tri(:,1), tri(:,2))
-            sigma_vm(i)
+            sigmas(i,:)
             return;
         end
     end
