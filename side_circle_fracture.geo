@@ -11,12 +11,18 @@ Point(1) = {0,0,0,lc1};
 Point(2) = {10,0,0,lc1};
 Point(3) = {10,10,0,lc1};
 Point(4) = {0,10,0,lc1};
-Point(5) = {0,5+h,0,lc2};
-Point(6) = {a,5+h,0,lc3};
-Point(7) = {a+h,5,0,lc3};
-Point(8) = {a,5-h,0,lc3};
-Point(9) = {0, 5-h, 0, lc2};
+Point(5) = {0,5+h,0,lc1};
+Point(6) = {a,5+h,0,lc1};
+Point(7) = {a+h,5,0,lc1};
+Point(8) = {a,5-h,0,lc1};
+Point(9) = {0, 5-h, 0, lc1};
 Point(10) = {a,5,0,lc1};
+
+Point(11) = {a+r*1.5,5,0,lc1};
+Point(12) = {a+r,5+r,0,lc1};
+Point(13) = {a+r,5-r,0,lc1};
+Point(14) = {a,5+r,0,lc1};
+Point(15) = {a,5-r,0,lc1};
 
 Line(1) = {1,2};
 Line(2) = {2,3};
@@ -36,4 +42,4 @@ Line Loop(1) = {1:9};
 
 
 Plane Surface(1) = {1};
-Point{10} In Surface{1};
+Point{10:15} In Surface{1};
