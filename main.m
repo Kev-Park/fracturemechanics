@@ -1,10 +1,10 @@
 %% Using n-CST mesh
 clear;
 
-nodes = load("nodes.dat");
+nodes = load("gmsh/" + "nodes.dat");
 nodes = nodes(:,2:3);
 
-elements = load("elements.dat");
+elements = load("gmsh/" + "elements.dat");
 elements = elements(:,6:8);
 
 E = 10^11;

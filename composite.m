@@ -1,10 +1,10 @@
 %% Using n-CST mesh
 clear;
 
-nodes = load("nodes.dat");
+nodes = load("gmsh/" + "nodes.dat");
 nodes = nodes(:,2:3);
 
-elements = load("elements.dat");
+elements = load("gmsh/" + "elements.dat");
 elements = elements(:,6:8);
 
 E = 10^11;
@@ -12,8 +12,8 @@ nu = .1;
 h = 0.1;
 
 % Composite parameters
-E_c = 10^11;
-nu_c = -0.99;
+E_c = 10^11.2;
+nu_c = 0.1;
 bhl = 1; % bounding box half length around crack tip for composite material application
 
 % Constitutive matrix
