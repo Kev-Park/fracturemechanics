@@ -54,40 +54,138 @@ for i = 1:length(elements)
 end
 
 % Assemble F_ext and enforce boundary conditions
-F_ext = zeros(2*length(nodes),1);
+% F_ext = zeros(2*length(nodes),1);
+% 
+% F = 0.5;
+% K_global_enforced = K_global;
+% 
+% for i = 1:length(nodes)
+% 
+%     if nodes(i,2) == 10 % If y is at top, apply stress
+%         F_ext(2*i) = -F; % Apply to y-dir
+%     end
+% 
+%     if nodes(i,2) == 0 % If y is at bottom, apply stress
+%         F_ext(2*i) = F; % Apply to y-dir
+%     end
+% 
+%     if nodes(i,1) == 10 % If x-coordinate is along the right boundary (fix)
+%         K_global_enforced(2*i-1,:) = 0;
+%         K_global_enforced(2*i-1,2*i-1) = 1;
+%         K_global_enforced(2*i,:) = 0;
+%         K_global_enforced(2*i,2*i) = 1;
+%     end
+% end
 
-F = 0.5;
-K_global_enforced = K_global;
+num_nodes = length(nodes);
+nelements = length(elements);
+dim = num_nodes * 2;
+F = 30000;
+H = 10;
+W = 10;
 
-for i = 1:length(nodes)
-
-    if nodes(i,2) == 10 % If y is at top, apply stress
-        F_ext(2*i) = -F; % Apply to y-dir
+top_right_node_num = 0;
+bot_right_node_num = 0;
+top_dof_forced = [];
+bot_dof_forced = [];
+for i = 1:num_nodes
+    if (nodes(i, 2) == H && nodes(i, 1) == W)
+        top_right_node_num = i;
+    elseif (nodes(i, 2) == 0 && nodes(i, 1) == W)
+        bot_right_node_num = i;
     end
 
-    if nodes(i,2) == 0 % If y is at bottom, apply stress
-        F_ext(2*i) = F; % Apply to y-dir
-    end
-
-    if nodes(i,1) == 10 % If x-coordinate is along the right boundary (fix)
-        K_global_enforced(2*i-1,:) = 0;
-        K_global_enforced(2*i-1,2*i-1) = 1;
-        K_global_enforced(2*i,:) = 0;
-        K_global_enforced(2*i,2*i) = 1;
+    if (nodes(i, 2) == H)
+        top_dof_forced = cat(2, top_dof_forced, [i*2-1, i*2]);
+    elseif (nodes(i, 2) == 0)
+        bot_dof_forced = cat(2, bot_dof_forced, [i*2-1, i*2]);
     end
 end
 
+dof_reactive = [top_right_node_num*2-1, bot_right_node_num*2-1, bot_right_node_num*2];
+
+dof_active = zeros(dim-length(dof_reactive), 1);
+
+activeIndex = 1;
+for i = 1:dim
+    index = find(dof_reactive==i);
+    if isempty(index)
+        dof_active(activeIndex) = i;
+        activeIndex = activeIndex + 1;
+    end
+end
+
+
+top_F_per_node = F/(length(top_dof_forced)/2);
+bot_F_per_node = -F/(length(bot_dof_forced)/2);
+
+F = zeros(dim, 1);
+for i = 1:dim
+    index = find(top_dof_forced==i);
+    if ~isempty(index) && (-1)^index == 1
+        F(i, 1) = top_F_per_node;
+    end
+
+    index2 = find(bot_dof_forced==i);
+    if ~isempty(index2) && (-1)^index2 == 1
+        F(i, 1) = bot_F_per_node;
+    end
+end
+
+% Enforcing Boundary Conditions in K_global, F
+
+BCs = zeros(dim, 1); % All zeros due to no set displacements
+
+K_global_enforced = K_global;
+F_ext = F;
+
+K_global_enforced(top_right_node_num*2-1, :) = zeros(1, dim);
+K_global_enforced(top_right_node_num*2-1, top_right_node_num*2-1) = 1;
+F_ext(top_right_node_num*2-1, 1) = BCs(i, 1);
+
+K_global_enforced(top_right_node_num*2, :) = zeros(1, dim);
+K_global_enforced(top_right_node_num*2, top_right_node_num*2) = 1;
+F_ext(top_right_node_num*2, 1) = BCs(i, 1);
+
+K_global_enforced(bot_right_node_num*2-1, :) = zeros(1, dim);
+K_global_enforced(bot_right_node_num*2-1, bot_right_node_num*2-1) = 1;
+F_ext(bot_right_node_num*2-1, 1) = BCs(bot_right_node_num*2-1, 1);
+
+K_global_enforced(bot_right_node_num*2, :) = zeros(1, dim);
+K_global_enforced(bot_right_node_num*2, bot_right_node_num*2) = 1;
+F_ext(bot_right_node_num*2, 1) = BCs(bot_right_node_num*2, 1);
+
+
+
 % Find displacement
-d = inv(K_global_enforced)*F_ext;
+d = K_global_enforced\F_ext;
 
 % Find stresses
-sigma_vm = zeros(length(elements),1);
-for i = 1:length(elements)
+% sigma_vm = zeros(length(elements),1);
+% for i = 1:length(elements)
+%     node1 = elements(i,1);
+%     node2 = elements(i,2);
+%     node3 = elements(i,3);
+%     d_i = [nodes(node1, 1) nodes(node1, 2) nodes(node2, 1) nodes(node2, 2) nodes(node3, 1) nodes(node3, 2)]';
+% 
+%     sigma = C*B_{i}*d_i;
+% 
+%     sigma_vm(i) = sqrt(sigma(1)^2 - sigma(1)*sigma(2) + sigma(2)^2 + 3*sigma(3)^2);
+% end
+
+sigma_vm = zeros(nelements ,1);
+for i = 1:nelements
     node1 = elements(i,1);
     node2 = elements(i,2);
     node3 = elements(i,3);
-    d_i = [nodes(node1, 1) nodes(node1, 2) nodes(node2, 1) nodes(node2, 2) nodes(node3, 1) nodes(node3, 2)]';
-    
+    % node_pos = cat(1, nodes(node1, :), nodes(node2, :), nodes(node3, :));
+
+    d1 = [d(node1*2-1), d(node1*2)];
+    d2 = [d(node2*2-1), d(node2*2)];
+    d3 = [d(node3*2-1), d(node3*2)];
+    d_i = cat(2, d1, d2, d3);
+    d_i = reshape(d_i, [6, 1]);
+
     sigma = C*B_{i}*d_i;
 
     sigma_vm(i) = sqrt(sigma(1)^2 - sigma(1)*sigma(2) + sigma(2)^2 + 3*sigma(3)^2);
@@ -99,7 +197,7 @@ nodes_displaced = nodes + reshape(d, 2, [])';
 % Plot triangles
 
 % Apply scaling to von Mises stresses so coloration is more apparent
-sigma_vm_sq = sigma_vm.^25;
+sigma_vm_sq = sigma_vm.^1;
 
 patch('Faces',elements,'Vertices',nodes_displaced,'FaceVertexCData', sigma_vm_sq,'FaceColor','flat','EdgeColor','none');
 colormap('hot');
