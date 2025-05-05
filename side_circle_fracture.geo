@@ -2,7 +2,7 @@ lc1 = 1;
 lc2 = 0.2;
 lc3 = 0.02;
 lc4 = 0.0002;
-h = 0.001;
+h = 0.005;
 a = 3;
 r = 0.4;
 
@@ -12,9 +12,9 @@ Point(2) = {10,0,0,lc1};
 Point(3) = {10,10,0,lc1};
 Point(4) = {0,10,0,lc1};
 Point(5) = {0,5+h,0,lc2};
-Point(6) = {a,5+h,0,lc4};
-Point(7) = {a+h,5,0,lc4};
-Point(8) = {a,5-h,0,lc4};
+Point(6) = {a,5+h,0,lc3};
+Point(7) = {a+h,5,0,lc3};
+Point(8) = {a,5-h,0,lc3};
 Point(9) = {0, 5-h, 0, lc2};
 Point(10) = {a,5,0,lc1};
 

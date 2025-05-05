@@ -1,10 +1,10 @@
 %% Using n-CST mesh
 clear;
 
-nodes = load("circle_nodes_high.dat");
+nodes = load("side_circle_nodes.dat");
 nodes = nodes(:,2:3);
 
-elements = load("circle_elements_high.dat");
+elements = load("side_circle_elements.dat");
 elements = elements(:,6:8);
 
 E = 10^11;
@@ -226,7 +226,7 @@ function showStress(src, event, sigmas)
             sigmas(i,:)
 
             % analytical - hard coded values for formula (!)
-            K = 15000 * sqrt(pi * 3) * (1.122 - 0.231 * (3/10) + 10.55 * (3/10)^2 - 21.71 * (3/10)^3 + 30.382 * (3/10)^4);
+            K = 30000 * sqrt(pi * 3) * (1.122 - 0.231 * (3/10) + 10.55 * (3/10)^2 - 21.71 * (3/10)^3 + 30.382 * (3/10)^4);
             r = sqrt((pt(1)-3)^2 + (pt(2)-5)^2);
             theta = atan((pt(2)-5)/(pt(1)-3));
             xx = (K/sqrt(2*pi*r)) * cos(theta/2) * (1 - sin(theta/2) * sin(3*theta/2));
@@ -234,9 +234,10 @@ function showStress(src, event, sigmas)
             xy = (K/sqrt(2*pi*r)) * cos(theta/2) * sin(theta/2) * cos(3*theta/2);
 
             % uncomment out as desired
-            % [xx, yy, 2*xy]
-            % r
-            % theta
+            disp("analytic");
+            [xx, yy, 2*xy]
+            r
+            theta
 
             return;
         end
